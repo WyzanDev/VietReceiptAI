@@ -1,0 +1,4 @@
+link dataset:
+UIT-Receipts: https://drive.google.com/drive/folders/1ShItNWXyiY1tFDM5W02bceHuJjyeeJl2
+SROIE: https://drive.google.com/drive/folders/1ShItNWXyiY1tFDM5W02bceHuJjyeeJl2
+MC-OCR: https://www.kaggle.com/datasets/domixi1989/vietnamese-receipts-mc-ocr-2021

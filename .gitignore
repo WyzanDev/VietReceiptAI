@@ -1,0 +1,23 @@
+# Local environments and generated caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Source papers, templates, and private working references are local-only.
+/reference/
+
+# Datasets are distributed separately. Keep only the download manifest.
+/dataset/*
+!/dataset/link_dataset.txt
+
+# Annotation packages are maintained on the dedicated `task` branch.
+/task/
+
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
