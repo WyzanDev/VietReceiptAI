@@ -1,0 +1,8 @@
+member,image_count,dataset,source_splits,prefilled_kie_regions
+member1,373,UIT-MLReceipts,train,2253
+member2,373,UIT-MLReceipts,train,2278
+member3,358,UIT-MLReceipts,val,2171
+member4,395,UIT-MLReceipts,test,2353
+member5,394,UIT-MLReceipts,test,2492
+member6,195,MC-OCR,validation,0
+member7,194,MC-OCR,validation,0

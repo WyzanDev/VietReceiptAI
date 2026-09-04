@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "total_images": 2282,
+  "dataset_counts": {
+    "UIT-MLReceipts": 1893,
+    "MC-OCR": 389
+  },
+  "assignment_strategy": "Five UIT-only members and two MC-OCR-only members, weighted by annotation difficulty.",
+  "members": [
+    {
+      "member": "member1",
+      "image_count": 373,
+      "dataset": "UIT-MLReceipts",
+      "source_splits": "train",
+      "prefilled_kie_regions": 2253
+    },
+    {
+      "member": "member2",
+      "image_count": 373,
+      "dataset": "UIT-MLReceipts",
+      "source_splits": "train",
+      "prefilled_kie_regions": 2278
+    },
+    {
+      "member": "member3",
+      "image_count": 358,
+      "dataset": "UIT-MLReceipts",
+      "source_splits": "val",
+      "prefilled_kie_regions": 2171
+    },
+    {
+      "member": "member4",
+      "image_count": 395,
+      "dataset": "UIT-MLReceipts",
+      "source_splits": "test",
+      "prefilled_kie_regions": 2353
+    },
+    {
+      "member": "member5",
+      "image_count": 394,
+      "dataset": "UIT-MLReceipts",
+      "source_splits": "test",
+      "prefilled_kie_regions": 2492
+    },
+    {
+      "member": "member6",
+      "image_count": 195,
+      "dataset": "MC-OCR",
+      "source_splits": "validation",
+      "prefilled_kie_regions": 0
+    },
+    {
+      "member": "member7",
+      "image_count": 194,
+      "dataset": "MC-OCR",
+      "source_splits": "validation",
+      "prefilled_kie_regions": 0
+    }
+  ],
+  "excluded_backlog": {
+    "MC-OCR_token_kie": "Blank token transcripts are a separate repair task and are not counted here."
+  }
+}
