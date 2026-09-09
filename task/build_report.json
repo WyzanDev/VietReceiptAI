@@ -1,63 +1,154 @@
 {
-  "schema_version": "1.0.0",
-  "total_images": 2282,
-  "dataset_counts": {
-    "UIT-MLReceipts": 1893,
-    "MC-OCR": 389
+  "layout": "member/dataset/source_split",
+  "images": 3631,
+  "packages": 16,
+  "members": 8,
+  "text_policy": "verbatim; normalized_value is empty",
+  "annotation_content_preserved": true,
+  "preserved_package_files": 3656,
+  "ocr_run_by_migration": false,
+  "audit": {
+    "registered_images": 3631,
+    "packages": 16,
+    "completed": 0,
+    "counts": {
+      "MC-OCR/train": 1100,
+      "MC-OCR/validation": 389,
+      "UIT-MLReceipts/test": 789,
+      "UIT-MLReceipts/train": 995,
+      "UIT-MLReceipts/val": 358
+    },
+    "errors": [],
+    "note": "Structural checks only; text accuracy and alignment require review."
   },
-  "assignment_strategy": "Five UIT-only members and two MC-OCR-only members, weighted by annotation difficulty.",
-  "members": [
+  "path_migration": [
     {
+      "old_package": "member1",
+      "package": "member1/UIT-MLReceipts/train",
       "member": "member1",
-      "image_count": 373,
       "dataset": "UIT-MLReceipts",
-      "source_splits": "train",
-      "prefilled_kie_regions": 2253
+      "source_split": "train",
+      "images": 373
     },
     {
+      "old_package": "member2",
+      "package": "member2/UIT-MLReceipts/train",
       "member": "member2",
-      "image_count": 373,
       "dataset": "UIT-MLReceipts",
-      "source_splits": "train",
-      "prefilled_kie_regions": 2278
+      "source_split": "train",
+      "images": 373
     },
     {
+      "old_package": "member3",
+      "package": "member3/UIT-MLReceipts/val",
       "member": "member3",
-      "image_count": 358,
       "dataset": "UIT-MLReceipts",
-      "source_splits": "val",
-      "prefilled_kie_regions": 2171
+      "source_split": "val",
+      "images": 358
     },
     {
+      "old_package": "member4",
+      "package": "member4/UIT-MLReceipts/test",
       "member": "member4",
-      "image_count": 395,
       "dataset": "UIT-MLReceipts",
-      "source_splits": "test",
-      "prefilled_kie_regions": 2353
+      "source_split": "test",
+      "images": 395
     },
     {
+      "old_package": "member5",
+      "package": "member5/UIT-MLReceipts/test",
       "member": "member5",
-      "image_count": 394,
       "dataset": "UIT-MLReceipts",
-      "source_splits": "test",
-      "prefilled_kie_regions": 2492
+      "source_split": "test",
+      "images": 394
     },
     {
+      "old_package": "member6",
+      "package": "member6/MC-OCR/validation",
       "member": "member6",
-      "image_count": 195,
       "dataset": "MC-OCR",
-      "source_splits": "validation",
-      "prefilled_kie_regions": 0
+      "source_split": "validation",
+      "images": 195
     },
     {
+      "old_package": "member7",
+      "package": "member7/MC-OCR/validation",
       "member": "member7",
-      "image_count": 194,
       "dataset": "MC-OCR",
-      "source_splits": "validation",
-      "prefilled_kie_regions": 0
+      "source_split": "validation",
+      "images": 194
+    },
+    {
+      "old_package": "round2/member1/MC-OCR/train",
+      "package": "member1/MC-OCR/train",
+      "member": "member1",
+      "dataset": "MC-OCR",
+      "source_split": "train",
+      "images": 138
+    },
+    {
+      "old_package": "round2/member2/MC-OCR/train",
+      "package": "member2/MC-OCR/train",
+      "member": "member2",
+      "dataset": "MC-OCR",
+      "source_split": "train",
+      "images": 138
+    },
+    {
+      "old_package": "round2/member3/MC-OCR/train",
+      "package": "member3/MC-OCR/train",
+      "member": "member3",
+      "dataset": "MC-OCR",
+      "source_split": "train",
+      "images": 138
+    },
+    {
+      "old_package": "round2/member4/MC-OCR/train",
+      "package": "member4/MC-OCR/train",
+      "member": "member4",
+      "dataset": "MC-OCR",
+      "source_split": "train",
+      "images": 138
+    },
+    {
+      "old_package": "round2/member5/MC-OCR/train",
+      "package": "member5/MC-OCR/train",
+      "member": "member5",
+      "dataset": "MC-OCR",
+      "source_split": "train",
+      "images": 137
+    },
+    {
+      "old_package": "round2/member6/MC-OCR/train",
+      "package": "member6/MC-OCR/train",
+      "member": "member6",
+      "dataset": "MC-OCR",
+      "source_split": "train",
+      "images": 137
+    },
+    {
+      "old_package": "round2/member7/MC-OCR/train",
+      "package": "member7/MC-OCR/train",
+      "member": "member7",
+      "dataset": "MC-OCR",
+      "source_split": "train",
+      "images": 137
+    },
+    {
+      "old_package": "round2/member8/MC-OCR/train",
+      "package": "member8/MC-OCR/train",
+      "member": "member8",
+      "dataset": "MC-OCR",
+      "source_split": "train",
+      "images": 137
+    },
+    {
+      "old_package": "round2/member8/UIT-MLReceipts/train",
+      "package": "member8/UIT-MLReceipts/train",
+      "member": "member8",
+      "dataset": "UIT-MLReceipts",
+      "source_split": "train",
+      "images": 249
     }
-  ],
-  "excluded_backlog": {
-    "MC-OCR_token_kie": "Blank token transcripts are a separate repair task and are not counted here."
-  }
+  ]
 }
