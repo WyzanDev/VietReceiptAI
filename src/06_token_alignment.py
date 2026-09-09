@@ -160,6 +160,11 @@ def main() -> None:
 
     task_root = args.task_dir.resolve()
     source = task_root / "annotations.jsonl"
+    if not source.is_file():
+        raise SystemExit(
+            "Không tìm thấy annotations.jsonl. Hãy chọn đúng gói dataset/split, "
+            "ví dụ --task-dir task/member1/MC-OCR/train; không chọn gốc task/member1."
+        )
     output = task_root / "aligned_annotations.jsonl"
     qc_path = task_root / "alignment_qc.csv"
     records = load_jsonl(source)

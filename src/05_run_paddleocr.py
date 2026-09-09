@@ -99,6 +99,14 @@ def main() -> None:
     parser.add_argument("--save-every", type=int, default=10)
     args = parser.parse_args()
 
+    task_root = args.task_dir.resolve()
+    annotation_path = task_root / "annotations.jsonl"
+    if not annotation_path.is_file():
+        raise SystemExit(
+            "Không tìm thấy annotations.jsonl. Hãy chọn đúng gói dataset/split, "
+            "ví dụ --task-dir task/member1/MC-OCR/train; không chọn gốc task/member1."
+        )
+
     try:
         import paddleocr
         from paddleocr import PaddleOCR
@@ -107,8 +115,6 @@ def main() -> None:
             "PaddleOCR is not installed. Follow OCR_GUIDE.md using a Python 3.11 environment."
         ) from error
 
-    task_root = args.task_dir.resolve()
-    annotation_path = task_root / "annotations.jsonl"
     records = load_jsonl(annotation_path)
     pipeline = PaddleOCR(
         lang="vi",

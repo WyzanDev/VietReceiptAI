@@ -223,7 +223,7 @@ def schema() -> dict[str, Any]:
                 "type": "array",
                 "items": {
                     "type": "array",
-                    "prefixItems": [{"type": "integer"}, {"type": "integer"}],
+                    "prefixItems": [{"type": "number"}, {"type": "number"}],
                     "minItems": 2,
                     "maxItems": 2,
                 },
@@ -235,6 +235,11 @@ def schema() -> dict[str, Any]:
                 "enum": ["unreviewed", "clear", "partly_unreadable", "unreadable"]
             },
             "source_annotation_id": {"type": ["integer", "null"]},
+            "source_segmentation": {
+                "type": "array",
+                "description": "Original MC-OCR COCO polygons; provenance only, not used for alignment.",
+                "items": {"type": "array", "items": {"type": "number"}},
+            },
         },
         "additionalProperties": False,
     }
@@ -275,7 +280,7 @@ def schema() -> dict[str, Any]:
                 "type": "array",
                 "items": {
                     "type": "array",
-                    "prefixItems": [{"type": "integer"}, {"type": "integer"}],
+                    "prefixItems": [{"type": "number"}, {"type": "number"}],
                     "minItems": 2,
                     "maxItems": 2,
                 },
@@ -320,7 +325,7 @@ def schema() -> dict[str, Any]:
                 "type": "object",
                 "required": ["member", "status", "reviewer"],
                 "properties": {
-                    "member": {"type": "string", "pattern": "^member[1-7]$"},
+                    "member": {"type": "string", "pattern": "^member[1-8]$"},
                     "status": {"enum": ["pending", "in_progress", "completed", "needs_review"]},
                     "reviewer": {"type": ["string", "null"]},
                 },
@@ -378,13 +383,27 @@ Schema máy đọc đầy đủ nằm trong `annotation_schema.json`.
 2. `fields`: bbox/polygon và giá trị đúng của bốn trường KIE.
 3. Sau căn chỉnh: mỗi token có `field` và `bio_label` (`B-*`, `I-*`, `O`).
 
-`raw_text` luôn chép đúng chữ nhìn thấy trên ảnh. `normalized_value` là bản chuẩn hóa phục vụ
-so sánh và huấn luyện. Không sửa `raw_text` cho "đẹp" và không đặt text giả như `a`.
+Trong `fields`, `raw_text` chép nguyên văn chữ nhìn thấy trên ảnh.
+Trong `ocr.tokens`, `raw_text` giữ text máy và `verified_text` giữ text đã sửa theo ảnh.
+Nhóm không chuẩn hóa: giữ nguyên giờ 12/24h, ngày tháng, số tiền, đơn vị và chữ hoa/thường.
+`normalized_value` là trường tương thích cũ, hiện luôn để `""` và không dùng làm đáp án.
+Giá trị có sẵn từ dataset vẫn là bản nháp cho đến khi được kiểm tra bằng mắt.
+
+## Định danh và split khi gộp
+
+Khóa ảnh là bộ ba `(dataset, source_split, image_id)`, không chỉ tên ảnh hoặc member.
+`task_id` phải duy nhất giữa các đợt; đợt bổ sung dùng tiền tố `r2-`.
+Giữ nguyên split gốc. Phân công cho người nào không thay đổi ảnh thuộc train/val/test.
+Sổ đăng ký chung `task/assignment_registry.jsonl` lưu đường dẫn gói, định danh,
+kích thước và SHA-256 ảnh để đối chiếu độc lập khi nhận kết quả.
 
 ## Quy ước tọa độ
 
 - `bbox = [x_min, y_min, x_max, y_max]`, đơn vị pixel trên ảnh gốc.
-- `polygon` là các điểm `[x, y]` theo chu vi vùng chữ.
+- `polygon` là các điểm `[x, y]` theo chu vi vùng chữ; cho phép tọa độ thập phân từ nguồn MC-OCR.
+- `source_segmentation` (nếu có) giữ nguyên polygon MC-OCR ban đầu để đối chiếu, không dùng trực tiếp cho alignment.
+  Khi nhiều polygon chung một transcript, bản nháp dùng bbox bao ngoài; cần xem ảnh để tách vùng/text hợp lý.
+- `source_annotation_id` của UIT là ID annotation gốc; của MC-OCR là vị trí annotation (bắt đầu từ 0) trong dòng nguồn của ảnh.
 - Mọi tọa độ phải nằm trong ảnh, `x_min < x_max`, `y_min < y_max`.
 - Không resize, crop, xoay hoặc ghi đè ảnh trong gói công việc.
 """
@@ -401,8 +420,8 @@ Kiểm tra OCR toàn trang và gán ground truth cho bốn trường `SELLER`, `
 
 1. Mở ảnh đúng theo `image_file`.
 2. Kiểm tra từng OCR token: sửa `verified_text` theo ảnh; token OCR thừa thì xóa, thiếu thì thêm.
-3. Kiểm tra vùng của bốn trường. UIT đã có bbox nháp; MC-OCR validation phải tạo vùng mới.
-4. Điền `raw_text`, `normalized_value`, `legibility`, `present`, rồi đặt `verified=true` cho từng trường.
+3. Kiểm tra vùng của bốn trường. UIT và MC-OCR train có nhãn nguồn làm bản nháp; MC-OCR validation phải tạo vùng mới.
+4. Điền `raw_text` nguyên văn, `legibility`, `present`; để `normalized_value=""`, rồi đặt `verified=true` cho từng trường.
 5. Khi cả OCR và bốn trường đã kiểm tra, đặt `ocr.status="verified"` và
    `assignment.status="completed"`.
 6. Chạy script căn chỉnh token và xử lý hết các dòng lỗi trong `alignment_qc.csv`.
@@ -418,15 +437,17 @@ Kiểm tra OCR toàn trang và gán ground truth cho bốn trường `SELLER`, `
 - `TOTAL_COST`: lấy tổng cuối cùng khách phải thanh toán. Không lấy subtotal/tạm tính, VAT,
   tiền khách đưa, tiền thừa hoặc số dư.
 
-## Chép text và chuẩn hóa
+## Chép nguyên văn — không chuẩn hóa (áp dụng cho cả hai đợt)
 
 - `raw_text`: chép nguyên văn, giữ dấu tiếng Việt, chữ hoa/thường, dấu phân cách và ký hiệu tiền.
-- `normalized_value` của `SELLER`, `ADDRESS`: bỏ khoảng trắng đầu/cuối, gom nhiều khoảng trắng;
-  không tự sửa chính tả.
-- `normalized_value` của `TIMESTAMP`: dùng `YYYY-MM-DD HH:MM:SS` nếu ảnh thể hiện đủ và rõ;
-  thiếu giờ thì `YYYY-MM-DD`. Nếu mơ hồ ngày/tháng, để giống `raw_text` và ghi chú.
-- `normalized_value` của `TOTAL_COST`: chỉ giữ giá trị số thập phân dùng dấu chấm, bỏ dấu phân
-  cách hàng nghìn và ký hiệu tiền; ví dụ `150.000 đ` thành `150000`.
+- Giữ `06:00 pm` đúng như ảnh, không đổi thành `18:00`. Giữ `01/08/2020`,
+  không đổi sang ISO. Giữ `150.000 đ`, không bỏ dấu phân cách hay đơn vị.
+- Không tự sửa chính tả trên hóa đơn, viết tắt, chữ hoa/thường hoặc dấu câu.
+- `fields.*.regions[].raw_text` là nội dung vùng KIE đã kiểm tra bằng mắt.
+- `ocr.tokens[].raw_text` giữ kết quả máy; sửa ở `verified_text` theo đúng ảnh.
+- `normalized_value` chỉ giữ để tương thích schema cũ; luôn để chuỗi rỗng `""`.
+  Nếu đã chuẩn hóa theo hướng dẫn cũ, đối chiếu ảnh để khôi phục text nguyên văn trước khi nộp;
+  không tự động suy ngược từ giá trị đã chuẩn hóa.
 - Không đoán ký tự không đọc được. Chọn `partly_unreadable` hoặc `unreadable` và mô tả ở `notes`.
 
 ## Quy tắc vùng
@@ -445,6 +466,7 @@ Kiểm tra OCR toàn trang và gán ground truth cho bốn trường `SELLER`, `
 - Không còn field có `present=null`, `verified=false` hoặc `legibility="unreviewed"`.
 - Không còn text giả `a`.
 - Mọi ảnh có OCR tokens đã được kiểm tra.
+- Mọi `normalized_value` đều để trống. Không chạy lại OCR với `--force` lên text đã verify.
 - `alignment_qc.csv` không còn mức `error`; cảnh báo phải được đọc và giải thích trong `notes`.
 - Không đổi tên ảnh, `task_id`, `dataset`, `source_split`, kích thước hoặc manifest.
 """
@@ -452,7 +474,7 @@ Kiểm tra OCR toàn trang và gán ground truth cho bốn trường `SELLER`, `
 
 OCR_GUIDE = """# OCR chung: PaddleOCR PP-OCRv6
 
-Nhóm dùng duy nhất PaddleOCR 3.5.x, pipeline PP-OCRv6 và `lang="vi"`. Model tiếng Việt này
+Nhóm dùng duy nhất PaddleOCR 3.7.0, pipeline PP-OCRv6 và `lang="vi"`. Model tiếng Việt này
 cũng đọc được phần lớn chuỗi Latin/Anh trên hóa đơn. Không dùng OCR web vì khác phiên bản,
 khó tái lập và có thể đưa dữ liệu ảnh ra ngoài.
 
@@ -471,6 +493,26 @@ Máy Windows kích hoạt bằng `.venv-ocr\\Scripts\\activate`. Nếu PaddlePad
 theo file requirements (đặc biệt với GPU), cài đúng bản PaddlePaddle 3.2.0 theo bộ chọn lệnh
 chính thức của PaddlePaddle rồi chạy lại lệnh cài requirements.
 
+## Cập nhật nếu đã cài theo hướng dẫn cũ
+
+PaddleOCR 3.5.0 không chấp nhận `ocr_version="PP-OCRv6"`. Cấu hình cũ
+`paddleocr>=3.5,<3.6` đã được thay bằng `paddleocr==3.7.0`.
+Sau khi lấy bản cập nhật từ nhóm, mở terminal tại thư mục member và kích hoạt
+môi trường OCR đang sử dụng, rồi chạy:
+
+```bash
+python -m pip install --upgrade -r requirements-ocr.txt
+python -m pip show paddleocr
+python -m pip check
+```
+
+Kiểm tra kết quả hiển thị `Version: 3.7.0`. Nếu đang làm trên nhánh annotation riêng,
+hãy commit phần việc đang làm rồi lấy cập nhật bằng `git fetch origin` và
+`git merge origin/task` trước khi cài lại.
+
+Nguồn: [mã nguồn PaddleOCR 3.5.0](https://github.com/PaddlePaddle/PaddleOCR/blob/v3.5.0/paddleocr/_pipelines/ocr.py)
+và [bản phát hành PaddleOCR 3.7.0](https://pypi.org/project/paddleocr/3.7.0/).
+
 ## Chạy OCR
 
 ```bash
@@ -480,8 +522,11 @@ python tools/05_run_paddleocr.py --task-dir . --device cpu
 Model tải một lần ở lần chạy đầu. Có thể kiểm tra 3 ảnh trước:
 
 ```bash
-python tools/05_run_paddleocr.py --task-dir . --device cpu --limit 3 --force
+python tools/05_run_paddleocr.py --task-dir . --device cpu --limit 3
 ```
+
+Chỉ thêm `--force` khi chủ động muốn chạy lại và ghi đè OCR đã có; tùy chọn này
+có thể thay thế text token đã được sửa tay.
 
 Nếu có GPU Paddle tương thích, đổi thành `--device gpu:0`. Script giữ nguyên tọa độ ảnh gốc,
 ghi OCR vào `annotations.jsonl` và có thể chạy tiếp để bỏ qua ảnh đã OCR.
@@ -571,6 +616,11 @@ Không thêm ảnh ngoài gói và không chuyển ảnh cho member khác nếu 
 
 
 def write_common_files(root: Path) -> None:
+    # Canonical maintained policy also covers the supplementary round.
+    canonical = PROJECT_ROOT / "task" / "common"
+    if canonical.is_dir() and root.resolve() != canonical.resolve():
+        shutil.copytree(canonical, root, dirs_exist_ok=True)
+        return
     root.mkdir(parents=True, exist_ok=True)
     json_dump(root / "annotation_schema.json", schema())
     (root / "DATASET_SCHEMA.md").write_text(SCHEMA_GUIDE, encoding="utf-8")
@@ -578,7 +628,7 @@ def write_common_files(root: Path) -> None:
     (root / "OCR_GUIDE.md").write_text(OCR_GUIDE, encoding="utf-8")
     (root / "TOKEN_ALIGNMENT.md").write_text(ALIGNMENT_GUIDE, encoding="utf-8")
     (root / "requirements-ocr.txt").write_text(
-        "paddleocr>=3.5,<3.6\npaddlepaddle==3.2.0\nPillow>=10,<13\n", encoding="utf-8"
+        "paddleocr==3.7.0\npaddlepaddle==3.2.0\nPillow>=10,<13\n", encoding="utf-8"
     )
 
 
@@ -685,6 +735,12 @@ def main() -> None:
     )
     args = parser.parse_args()
     OUTPUT_ROOT = args.output.resolve()
+
+    if (OUTPUT_ROOT / "assignment_registry.jsonl").exists():
+        raise SystemExit(
+            "This directory has frozen assignments. Do not rebuild with script 04, even with --force. "
+            "Use script 09 to migrate the layout or a separate --output for historical experiments."
+        )
 
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     existing = list(OUTPUT_ROOT.iterdir())
