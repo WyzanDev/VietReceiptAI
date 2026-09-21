@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17685c" />
+    <title>VietReceipt · OCR Annotation</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/geometry.js" defer></script>
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body class="signed-out">
+    <main id="loginScreen" class="login-screen">
+      <section class="login-card" aria-labelledby="loginTitle">
+        <span class="brand-mark">V<span>r</span></span>
+        <p class="eyebrow">VietReceipt</p>
+        <h1 id="loginTitle">Đăng nhập</h1>
+        <p>Nhập mật khẩu được giao để mở đúng batch của bạn.</p>
+        <form id="loginForm">
+          <label class="input-label" for="password">Mật khẩu</label>
+          <input id="password" type="password" autocomplete="current-password" required maxlength="128" placeholder="Mật khẩu (MSSV)" />
+          <button id="loginButton" class="button primary" type="submit">Đăng nhập</button>
+          <p id="loginError" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+    <div class="workspace" hidden>
+      <aside class="sidebar" aria-label="Danh sách ảnh">
+        <a class="brand" href="/" aria-label="VietReceipt trang chủ"><span class="brand-mark">V<span>r</span></span><span>VietReceipt<small>OCR Annotation</small></span></a>
+        <div class="collection-head"><span class="member-badge" id="memberBadge">Chưa đăng nhập</span><span id="batchLabel" class="batch-label"></span></div>
+        <h1>Ảnh hóa đơn</h1>
+        <section class="progress-card" aria-label="Tiến độ">
+          <div class="progress-top"><strong id="completedCount">0</strong><span id="totalCount">/ — ảnh đã xử lý</span><span id="progressPercent">0%</span></div>
+          <div class="progress-track"><div id="progressBar"></div></div>
+          <small id="progressDetail">0 đã hoàn tất · 0 đã loại</small>
+        </section>
+        <label class="search-wrap"><span data-icon="search"></span><input id="search" type="search" placeholder="Tìm mã ảnh…" aria-label="Tìm ảnh" /><kbd>/</kbd></label>
+        <div class="filter-row"><select id="filter" aria-label="Lọc trạng thái"><option value="all">Tất cả</option><option value="pending">Chưa bắt đầu</option><option value="in_progress">Đang làm</option><option value="needs_review">Cần xem lại</option><option value="completed">Đã hoàn tất</option><option value="excluded">Đã loại</option></select><span id="visibleCount"></span></div>
+        <nav id="receiptList" class="receipt-list" aria-label="Chọn ảnh"><div class="loading-note">Đang mở bộ dữ liệu…</div></nav>
+        <div class="sidebar-bottom"><button id="helpBtn" class="button quiet">Hướng dẫn</button><button id="logoutBtn" class="button quiet">Đăng xuất</button></div>
+      </aside>
+      <main class="main">
+        <header class="topbar"><div class="breadcrumb"><strong id="receiptTitle">Đang tải</strong><span id="docStatus" class="status-pill">Chưa bắt đầu</span></div><div class="top-actions"><span id="saveState" class="save-state" aria-live="polite">Tự động lưu</span><button id="saveBtn" class="button quiet"><span data-icon="save"></span>Lưu</button><button id="exportBtn" class="button outline"><span data-icon="download"></span>Xuất JSONL</button></div></header>
+        <div class="work-area" inert>
+          <section class="viewer-panel" aria-label="Ảnh hóa đơn">
+            <div class="viewer-heading"><div class="image-heading"><h2>Ảnh hóa đơn</h2><span id="imageSize" class="image-size">—</span></div><span class="image-counter" id="imageCounter"></span></div>
+            <div class="image-toolbar"><div class="tool-group"><button id="panBtn" class="tool active" title="Kéo ảnh · giữ Space" aria-label="Kéo ảnh"><span data-icon="hand"></span></button><button id="drawBtn" class="tool" title="Vẽ vùng chữ mới" aria-label="Vẽ vùng chữ mới"><span data-icon="box"></span></button><span class="separator"></span><button id="rotateBtn" class="tool" title="Xoay góc nhìn 90°" aria-label="Xoay góc nhìn"><span data-icon="rotate"></span></button></div><div class="tool-group"><button id="zoomOut" class="tool" aria-label="Thu nhỏ">−</button><button id="fitBtn" class="zoom-label" title="Vừa khung · F">Vừa khung</button><button id="zoomIn" class="tool" aria-label="Phóng to">+</button><span class="separator"></span><button id="toggleBoxes" class="tool active" aria-label="Ẩn hoặc hiện vùng chữ" title="Ẩn/hiện vùng chữ"><span data-icon="layers"></span></button></div></div>
+            <div id="viewport" class="viewport"><svg id="imageSvg" xmlns="http://www.w3.org/2000/svg" aria-label="Ảnh với vùng chữ có thể chọn" role="img"><g id="imageGroup"><image id="receiptImage" x="0" y="0" /><g id="boxLayer"></g><rect id="draftBox" class="draft-box" visibility="hidden" /></g></svg><div id="imageLoading" class="image-loading">Đang tải ảnh…</div><div id="viewerTip" class="viewer-tip"><span data-icon="mouse"></span>Chọn vùng chữ để đối chiếu · Cuộn để phóng to</div></div>
+            <div class="viewer-footer"><div class="legend"><span><i class="legend-ocr"></i>Chưa duyệt</span><span><i class="legend-done"></i>Đã duyệt</span><span><i class="legend-current"></i>Đang chọn</span></div><span id="rotationNote">Tọa độ theo ảnh gốc</span></div>
+          </section>
+          <aside class="review-panel" aria-label="Nội dung cần duyệt">
+            <div class="review-tabs" role="tablist"><button id="ocrTab" class="tab active" role="tab" aria-selected="true">Văn bản <span id="tokenCount">0</span></button></div>
+            <div class="review-body">
+              <div id="ocrContent"><div class="section-label"><h3>Các dòng trên ảnh</h3><span id="reviewedCount">0 / 0 đã duyệt</span></div><div id="tokenList" class="token-list"></div><button id="addTokenBtn" class="add-button"><span data-icon="plus"></span>Vẽ thêm dòng bị thiếu</button></div>
+              <section id="editor" class="editor" hidden><div class="section-label"><h3 id="editorTitle">Đối chiếu dòng</h3><div class="editor-nav"><button id="previousItem" class="icon-button" aria-label="Dòng trước">↑</button><button id="nextItem" class="icon-button" aria-label="Dòng tiếp theo">↓</button></div></div><div class="crop-frame"><img id="cropImage" alt="Ảnh cắt của vùng đang chọn" /><span id="cropLoading">Đang tải vùng ảnh…</span></div><label class="input-label" for="finalText">Transcript <span>Chép nguyên văn từ ảnh</span></label><textarea id="finalText" rows="2" placeholder="Nhập nội dung nhìn thấy…" spellcheck="false"></textarea><div id="regionInputs"><label class="input-label" for="legibility">Khả năng đọc</label><select id="legibility"><option value="clear" selected>Đọc rõ</option><option value="unreviewed">Chưa kiểm tra</option><option value="partial">Đọc được một phần</option><option value="unreadable">Không đọc được</option></select></div><details class="geometry-details"><summary>Chỉnh vùng trên ảnh <span>kéo góc hoặc nhập tọa độ</span></summary><div class="bbox-inputs"><label>X₁<input id="boxX1" step="any" type="number" min="0" /></label><label>Y₁<input id="boxY1" step="any" type="number" min="0" /></label><label>X₂<input id="boxX2" step="any" type="number" min="1" /></label><label>Y₂<input id="boxY2" step="any" type="number" min="1" /></label></div><small>Kéo từng đỉnh để giữ vùng nghiêng. Nhập bbox sẽ đổi vùng thành hình chữ nhật.</small></details><div class="editor-actions"><button id="deleteItem" class="button danger-quiet"><span data-icon="trash"></span>Xóa vùng</button><button id="reviewToken" class="button primary"><span data-icon="check"></span>Xác nhận & tiếp</button></div></section>
+              <div id="selectionEmpty" class="selection-empty"><span data-icon="cursor"></span><p>Chọn một vùng chữ trên ảnh<br />hoặc một dòng để bắt đầu đối chiếu.</p></div>
+              <section class="review-checks"><label id="ocrConfirmLabel" class="check-row"><input id="ocrConfirmed" type="checkbox" /><span>Tôi đã kiểm tra toàn bộ chữ trên ảnh<small>Bao gồm các dòng bị thiếu và vùng nhận thừa</small></span></label></section>
+            </div>
+            <footer class="review-footer"><button id="qcBtn" class="button outline"><span data-icon="shield"></span>Kiểm tra</button><button id="excludeBtn" class="button danger-quiet">Loại ảnh</button><button id="restoreBtn" class="button outline" hidden>Khôi phục ảnh</button><button id="completeBtn" class="button primary"><span data-icon="check"></span>Hoàn tất ảnh</button></footer>
+          </aside>
+        </div>
+        <footer class="bottom-bar"><div><button id="undoBtn" class="text-button" disabled><span data-icon="undo"></span>Hoàn tác</button><span class="bottom-hint">Ctrl S lưu · Ctrl Z hoàn tác · Alt ↓ dòng tiếp</span></div><div><button id="previousReceipt" class="button quiet compact">← Ảnh trước</button><button id="nextReceipt" class="button quiet compact">Ảnh tiếp →</button></div></footer>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <dialog id="modal" aria-labelledby="modalTitle"><div class="modal-heading"><h2 id="modalTitle"></h2><button id="closeModal" class="icon-button" aria-label="Đóng">×</button></div><div id="modalBody"></div><div id="modalActions" class="modal-actions"></div></dialog>
+  </body>
+</html>

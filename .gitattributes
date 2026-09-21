@@ -1,0 +1,7 @@
+# Keep receipt images in Git LFS instead of normal Git blobs.
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+datasets/batches/**/*.png filter=lfs diff=lfs merge=lfs -text
+datasets/batches/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+datasets/batches/**/*.jpeg filter=lfs diff=lfs merge=lfs -text

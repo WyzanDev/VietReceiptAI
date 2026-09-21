@@ -1,0 +1,28 @@
+# Local environments and generated files
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+/NUL/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Coordinator-only processing assets
+/artifacts/
+/scripts/
+/requirements-coordinator.txt
+
+# Source datasets are not part of the member release
+/datasets/raw/
+/datasets/verified/
+/datasets/audit/
+/datasets/quarantine/
+
+# Local annotation state and logs
+*.sqlite3
+*.db
+*.log
+*.tmp

@@ -1,0 +1,8 @@
+# Python 3.11; install only in the root .venv.
+# App + shared data utilities. Paddle GPU and test tools: see README.md.
+fastapi==0.141.1
+uvicorn==0.52.4
+Pillow>=10.1,<13
+jsonschema>=4.23,<5
+shapely>=2,<3
+opencv-python>=4.10,<5
